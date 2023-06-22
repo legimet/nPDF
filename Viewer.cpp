@@ -32,7 +32,7 @@ const float Viewer::minScale = 0.1;
 
 // We have a separate initialization method for the error handling
 Viewer::Viewer() {
-	ctx = fz_new_context(nullptr, nullptr, FZ_STORE_UNLIMITED);
+	ctx = fz_new_context(nullptr, nullptr, 16 << 20);
 	if (ctx) {
 		fz_register_document_handlers(ctx);
 	} else {
