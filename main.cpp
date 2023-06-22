@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
 				v->display();
 			}
 		}
-		sleep(10);
+		msleep(10);
 	}
 
 	Screen::deinit();

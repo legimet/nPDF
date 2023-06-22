@@ -569,9 +569,9 @@ $(LCMS2_OUT):
 $(LCMS2_OUT)/%.o: $(LCMS2_DIR)/src/%.c | $(LCMS2_OUT)
 	$(CC_CMD) -I$(LCMS2_DIR)/include
 
-LCMS2_CFLAGS := -I$(LCMS2_DIR)/include
+LCMS2_CFLAGS := -I$(LCMS2_DIR)/include -DCMS_NO_PTHREADS
 else
-LCMS2_CFLAGS := -DNO_ICC
+LCMS2_CFLAGS := -DNO_ICC -DCMS_NO_PTHREADS
 endif
 
 # --- cURL ---
