@@ -277,16 +277,15 @@ int Viewer::getPages() {
 
 void Viewer::fixBounds() {
 	// Make sure we don't go out of bounds
-	if (xPos < 0 || bounds.x1 - bounds.x0 <= width) {
-		xPos = 0;
-	} else if (xPos >= (bounds.x1 - bounds.x0) - std::min(width, static_cast<int>(bounds.x1 - bounds.x0))) {
-		xPos = (bounds.x1 - bounds.x0) - std::min(width, static_cast<int>(bounds.x1 - bounds.x0));
-	}
-	if (yPos < 0 || bounds.y1 - bounds.y0 <= height) {
-		yPos = 0;
-	} else if (yPos >= (bounds.y1 - bounds.y0) - std::min(height, static_cast<int>(bounds.y1 - bounds.y0))) {
-		yPos = (bounds.y1 - bounds.y0) - std::min(height, static_cast<int>(bounds.y1 - bounds.y0));
-	}
+	const int boundsWidth = static_cast<int>(bounds.x1 - bounds.x0);
+	const int boundsHeight = static_cast<int>(bounds.y1 - bounds.y0);
+	const int maxAllowedWidth = boundsWidth - std::min(width, boundsWidth);
+	const int maxAllowedHeight = boundsHeight - std::min(height, boundsHeight);
+	if (xPos < 0 || boundsWidth <= width) xPos = 0;
+	else xPos = std::min(xPos, maxAllowedWidth);
+
+	if (yPos < 0 || boundsHeight <= height) yPos = 0;
+	else yPos = std::min(yPos, maxAllowedHeight);
 }
 
 void Viewer::drawPage() {
