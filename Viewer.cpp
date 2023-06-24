@@ -416,13 +416,9 @@ void Viewer::scrollRight() {
 	}
 }
 
-void Viewer::setFitSize() {
-	fitSize = true;
+void Viewer::setFitSize(bool fit) {
+	fitSize = fit;
 	drawPage();
-}
-
-void Viewer::unsetFitSize() {
-	fitSize = false;
 }
 
 void Viewer::zoomIn() {

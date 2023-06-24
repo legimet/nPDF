@@ -127,8 +127,7 @@ class Viewer {
 		void scrollDown();
 		void scrollLeft();
 		void scrollRight();
-		void setFitSize();
-		void unsetFitSize();
+		void setFitSize(bool fit);
 		void zoomIn();
 		void zoomOut();
 		void gotoPage(unsigned int page);

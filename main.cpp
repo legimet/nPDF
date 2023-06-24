@@ -36,7 +36,8 @@ enum ScrollAction {
 	zoomout = 64,
 	zoomin = 128,
 	findnext = 256,
-	findprev = 512
+	findprev = 512,
+	resetzoom = 1024,
 };
 
 ScrollAction operator|(ScrollAction a, ScrollAction b) {
@@ -78,6 +79,8 @@ ScrollAction getScrollKey() {
 		else
 			action |= findnext;
 	}
+	if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_R))
+		action |= resetzoom;
 	return action;
 }
 
@@ -163,6 +166,9 @@ int main(int argc, char **argv) {
 					toRefresh = 1;
 				} else if (current & zoomin) {
 					v->zoomIn();
+					toRefresh = 1;
+				} else if (current & resetzoom) {
+					v->setFitSize(true);
 					toRefresh = 1;
 				}
 				if (current & findnext) {

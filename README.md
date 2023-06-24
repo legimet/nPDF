@@ -9,6 +9,7 @@ It supports PDF, XPS, CBZ, EPUB, HTML, and various image formats.
 * Touchpad/Numpad: Scrolling
 * ×: Zoom in
 * ÷: Zoom out
+* Ctrl+R: Reset zoom
 * -: Previous page
 * +: Next page
 * Ctrl+Tab: Go to page
