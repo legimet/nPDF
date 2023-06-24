@@ -220,7 +220,6 @@ Viewer::Viewer()
 	scale = 1.0f;
 	xPos = 0;
 	yPos = 0;
-	fitWidth = true;
 }
 
 Viewer::~Viewer() {
@@ -301,8 +300,11 @@ void Viewer::drawPage() {
 	fz_page* page = doc->ensureCurrentPageLoaded();
 	bounds = doc->getBounds();
 
-	if (fitWidth) {
-		scale = width / (bounds.x1 - bounds.x0);
+	if (fitSize) {
+		scale = std::min(
+			width / (bounds.x1 - bounds.x0),
+			height / (bounds.y1 - bounds.y0)
+		);
 	}
 
 	fz_scale(&transform, scale, scale);
@@ -414,19 +416,19 @@ void Viewer::scrollRight() {
 	}
 }
 
-void Viewer::setFitWidth() {
-	fitWidth = true;
+void Viewer::setFitSize() {
+	fitSize = true;
 	drawPage();
 }
 
-void Viewer::unsetFitWidth() {
-	fitWidth = false;
+void Viewer::unsetFitSize() {
+	fitSize = false;
 }
 
 void Viewer::zoomIn() {
 	// Try to zoom in on the center
 	if (scale * zoom <= maxScale) {
-		fitWidth = false;
+		fitSize = false;
 		xPos = (xPos + std::min(width, static_cast<int>(bounds.x1 - bounds.x0)) / 2) * zoom;
 		xPos -= std::min(width, static_cast<int>((bounds.x1 - bounds.x0) * zoom)) / 2;
 		yPos = (yPos + std::min(height, static_cast<int>(bounds.y1 - bounds.y0)) / 2) * zoom;
@@ -439,7 +441,7 @@ void Viewer::zoomIn() {
 void Viewer::zoomOut() {
 	// Try to zoom out from the center
 	if (scale / zoom >= minScale) {
-		fitWidth = false;
+		fitSize = false;
 		xPos = (xPos + std::min(width, static_cast<int>(bounds.x1 - bounds.x0)) / 2) / zoom;
 		xPos -= std::min(width, static_cast<int>((bounds.x1 - bounds.x0) / zoom)) / 2;
 		yPos = (yPos + std::min(height, static_cast<int>(bounds.y1 - bounds.y0)) / 2) / zoom;

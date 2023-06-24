@@ -104,7 +104,7 @@ class Viewer {
 		float scale;
 		int xPos;
 		int yPos;
-		bool fitWidth;
+		bool fitSize = true;
 		const int width;
 		const int height;
 
@@ -127,8 +127,8 @@ class Viewer {
 		void scrollDown();
 		void scrollLeft();
 		void scrollRight();
-		void setFitWidth();
-		void unsetFitWidth();
+		void setFitSize();
+		void unsetFitSize();
 		void zoomIn();
 		void zoomOut();
 		void gotoPage(unsigned int page);
