@@ -166,10 +166,10 @@ int main(int argc, char **argv) {
 					toRefresh = 1;
 				}
 				if (current & findnext) {
-					v->findNext(0);
+					v->findNext(Direction::FORWARD);
 					toRefresh = 1;
 				} else if (current & findprev) {
-					v->findNext(1);
+					v->findNext(Direction::BACKWARD);
 					toRefresh = 1;
 				}
 				if (toRefresh) {
@@ -186,18 +186,18 @@ int main(int argc, char **argv) {
 			if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_TAB)) {
 				wait_no_key_pressed();
 				if (show_1numeric_input("Go to page", "", "Enter page number", &page, 1, v->getPages())) {
-					v->gotoPage(page - 1);
+					if (page > 0){
+						v->gotoPage(static_cast<unsigned int>(page - 1));
+					}
 				}
 				v->display();
 			}
 			if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_F)) {
 				char *s = nullptr;
 				wait_no_key_pressed();
-				if (show_msg_user_input("Find", "Enter string to search for", "", &s) != -1) {
-					if(v->find(s)) {
-						v->findNext(0);
-					}
-					delete s;
+				int len = show_msg_user_input("Find", "Enter string to search for", "", &s);
+				if (len > 0) {
+					v->find(s);
 				}
 				v->display();
 			}
