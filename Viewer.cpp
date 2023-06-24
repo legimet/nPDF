@@ -236,6 +236,10 @@ void Viewer::invertPixels(const fz_rect *rect) {
 	fz_invert_pixmap_rect(ctx, pix, &b);
 }
 
+void Viewer::ensureInView(const fz_rect *rect) {
+	if (xPos > rect->x0 || xPos + width < rect->x1) xPos = (rect->x0 + rect->x1) / 2 - width / 2;
+	if (yPos > rect->y0 || yPos + height < rect->y1) yPos = (rect->y0 + rect->y1) / 2 - height / 2;
+}
 
 bool Viewer::find(char *s) {
 	const fz_rect* match = doc->getCurrentMatch();
@@ -256,6 +260,7 @@ bool Viewer::findNext(Direction dir) {
 
 	match = doc->findNext(dir);
 	if (match) {
+		ensureInView(match);
 		drawPage();
 		return true;
 	}

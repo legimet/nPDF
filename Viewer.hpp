@@ -117,6 +117,7 @@ class Viewer {
 		bool find(char *s);
 		bool findNext(Direction dir);
 		void openDoc(const char *path);
+		void ensureInView(const fz_rect *rect);
 		int getPages();
 		void drawPage();
 		void display();
