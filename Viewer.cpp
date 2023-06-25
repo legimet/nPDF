@@ -337,22 +337,27 @@ void Viewer::display() {
 
 	// Center it
 	int x = 0, y = 0;
+	// Side fill
 	if (pix->w < width) {
 		x = (width - pix->w) / 2;
 		Screen::fillRect(bgColor, 0, 0, x, height);
 		Screen::fillRect(bgColor, x + pix->w, 0, width - (x + pix->w), height);
 	}
+	// Top/Bottom fill
 	if (pix->h < height) {
 		y = (height - pix->h) / 2;
 		Screen::fillRect(bgColor, 0, 0, width, y);
-		Screen::fillRect(bgColor, y + pix->h, 0, width, height - (y + pix->h));
+		Screen::fillRect(bgColor, 0, y + pix->h, width, height - (y + pix->h));
 	}
+
+	// Content
 	if (has_colors) {
 		Screen::showImgRGBA(pix->samples, x, y, xPos, yPos, std::min(width, pix->w), std::min(height, pix->h), pix->w);
 	} else {
 		Screen::showImgGrayA(pix->samples, x, y, xPos, yPos, std::min(width, pix->w), std::min(height, pix->h), pix->w);
 	}
 
+	// Scroll bars
 	if ((bounds.y1-bounds.y0)>height) {
 		Screen::drawVert(0,0,0,width-1,0,height-4);
 		Screen::drawVert(0,0,0,width-5,0,height-4);
@@ -361,7 +366,6 @@ void Viewer::display() {
 		Screen::fillRect(255,255,255,width-4, 1, 3, height-6);
 		Screen::drawVert(0,0,0,width-3,2+yPos*(height-8)/(bounds.y1-bounds.y0),height*(height-7)/(bounds.y1-bounds.y0));
 	}
-
 	if ((bounds.x1-bounds.x0)>width) {
 		Screen::drawHoriz(0,0,0,0,height-1,width-4);
 		Screen::drawHoriz(0,0,0,0,height-5,width-4);
