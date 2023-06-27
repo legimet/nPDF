@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with nPDF.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <memory>
 #include <keys.h>
 #include <libndls.h>
 #include <string>
@@ -123,15 +122,14 @@ int main(int argc, char **argv) {
 	}
 
 	try {
-		std::unique_ptr<Viewer> v = std::make_unique<Viewer>();
-		v.reset(new Viewer);
-		v->openDoc(argv[1]);
+		Viewer v{};
+		v.openDoc(argv[1]);
 
 		if(!Screen::init())
 			return 1;
 		Timer::init();
-		v->drawPage();
-		v->display();
+		v.drawPage();
+		v.display();
 
 		ScrollAction lastScrollKey = none;
 		ScrollAction current = none;
@@ -143,46 +141,46 @@ int main(int argc, char **argv) {
 				if (current != lastScrollKey || Timer::done()) {
 					toRefresh = false;
 					if (current & down) {
-						v->scrollDown();
+						v.scrollDown();
 						toRefresh = 1;
 					} else if (current & up) {
-						v->scrollUp();
+						v.scrollUp();
 						toRefresh = 1;
 					}
 					if (current & right) {
-						v->scrollRight();
+						v.scrollRight();
 						toRefresh = 1;
 					} else if (current & left) {
-						v->scrollLeft();
+						v.scrollLeft();
 						toRefresh = 1;
 					}
 					if (current & pgdown) {
-						v->next();
+						v.next();
 						toRefresh = 1;
 					} else if (current & pgup) {
-						v->prev();
+						v.prev();
 						toRefresh = 1;
 					}
 					if (current & zoomout) {
-						v->zoomOut();
+						v.zoomOut();
 						toRefresh = 1;
 					} else if (current & zoomin) {
-						v->zoomIn();
+						v.zoomIn();
 						toRefresh = 1;
 					} else if (current & resetzoom) {
-						v->setFitSize(true);
+						v.setFitSize(true);
 						toRefresh = 1;
 					}
 					if (current & findnext) {
-						v->findNext(Direction::FORWARD);
+						v.findNext(Direction::FORWARD);
 						toRefresh = 1;
 					} else if (current & findprev) {
-						v->findNext(Direction::BACKWARD);
+						v.findNext(Direction::BACKWARD);
 						toRefresh = 1;
 					}
 					if (toRefresh) {
 						handleDelays(current, lastScrollKey);
-						v->display();
+						v.display();
 					}
 				}
 			} else {
@@ -193,21 +191,21 @@ int main(int argc, char **argv) {
 				}
 				if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_TAB)) {
 					wait_no_key_pressed();
-					if (show_1numeric_input("Go to page", "", "Enter page number", &page, 1, v->getPages())) {
+					if (show_1numeric_input("Go to page", "", "Enter page number", &page, 1, v.getPages())) {
 						if (page > 0){
-							v->gotoPage(static_cast<unsigned int>(page - 1));
+							v.gotoPage(static_cast<unsigned int>(page - 1));
 						}
 					}
-					v->display();
+					v.display();
 				}
 				if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_F)) {
 					char *s = nullptr;
 					wait_no_key_pressed();
 					int len = show_msg_user_input("Find", "Enter search string", "", &s);
 					if (len > 0) {
-						v->find(s);
+						v.find(s);
 					}
-					v->display();
+					v.display();
 				}
 			}
 			msleep(10);
