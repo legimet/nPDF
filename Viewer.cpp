@@ -25,7 +25,7 @@ extern "C" {
 #include "Screen.hpp"
 
 const int Viewer::scroll = 20;
-const float Viewer::zoom = 1.2;
+const float Viewer::zoom = 1.25;
 const unsigned char Viewer::bgColor = 103;
 const float Viewer::maxScale = 2.0;
 const float Viewer::minScale = 0.1;
