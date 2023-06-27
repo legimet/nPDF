@@ -234,8 +234,10 @@ void Viewer::invertPixels(const fz_rect *rect) {
 }
 
 void Viewer::ensureInView(const fz_rect *rect) {
-	if (xPos > rect->x0 || xPos + width < rect->x1) xPos = (rect->x0 + rect->x1) / 2 - width / 2;
-	if (yPos > rect->y0 || yPos + height < rect->y1) yPos = (rect->y0 + rect->y1) / 2 - height / 2;
+	if (xPos > rect->x0 * scale || xPos + width < rect->x1 * scale)
+		xPos = ((rect->x0 + rect->x1) * scale / 2.0 - width / 2.0);
+	if (yPos > rect->y0 * scale || yPos + height < rect->y1 * scale)
+		yPos = ((rect->y0 + rect->y1) * scale / 2.0 - height / 2.0);
 }
 
 bool Viewer::find(char *s) {
