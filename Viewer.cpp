@@ -271,7 +271,7 @@ void Viewer::openDoc(const char *path) {
 	bool success = d->open(path);
 	doc = std::move(d);
 	if (!success) {
-		show_msgbox("nPDF", "Can't open document");
+		throw "Can't open document.";
 	}
 }
 
