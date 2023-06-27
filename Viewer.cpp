@@ -116,7 +116,6 @@ const fz_rect& Document::getBounds() {
 }
 
 bool Document::gotoPage(unsigned int page){
-	printf("gotoPage(%i)\n", page);
 	if (page < getPages()) {
 		resetFind();
 		pageNo = page;
@@ -139,7 +138,6 @@ void Document::resetFind() {
 }
 
 const fz_rect* Document::find(char *s) {
-	printf("find\n");
 	if (matchingFor != nullptr && matchingFor != s){
 		// free(matchingFor);
 		matchingFor = nullptr;
@@ -293,9 +291,6 @@ void Viewer::fixBounds() {
 }
 
 void Viewer::drawPage() {
-	fz_drop_pixmap(ctx, pix);
-
-	pix = nullptr;
 
 	fz_page* page = doc->ensureCurrentPageLoaded();
 	bounds = doc->getBounds();
@@ -315,10 +310,15 @@ void Viewer::drawPage() {
 
 	fixBounds();
 
-	if (has_colors) {
-		pix = fz_new_pixmap_with_bbox(ctx, fz_device_rgb(ctx), &bbox, nullptr, 1);
-	} else {
-		pix = fz_new_pixmap_with_bbox(ctx, fz_device_gray(ctx), &bbox, nullptr, 1);
+	if (pix == nullptr || !(pix->x == bbox.x0 && pix->x + pix->w == bbox.x1 && pix->y == bbox.y0 && pix->y + pix->h == bbox.y1)) {
+		fz_drop_pixmap(ctx, pix);
+		pix = nullptr;
+
+		if (has_colors) {
+			pix = fz_new_pixmap_with_bbox(ctx, fz_device_rgb(ctx), &bbox, nullptr, 1);
+		} else {
+			pix = fz_new_pixmap_with_bbox(ctx, fz_device_gray(ctx), &bbox, nullptr, 1);
+		}
 	}
 	fz_clear_pixmap_with_value(ctx, pix, 0xff);
 
