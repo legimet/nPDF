@@ -125,8 +125,7 @@ int main(int argc, char **argv) {
 		Viewer v{};
 		v.openDoc(argv[1]);
 
-		if(!Screen::init())
-			return 1;
+		Screen screen{};
 		Timer::init();
 		v.drawPage();
 		v.display();
@@ -213,8 +212,6 @@ int main(int argc, char **argv) {
 	} catch(const char *s) {
 		show_msgbox("nPDF", s);
 	}
-
-	Screen::deinit();
 
 	return 0;
 }
