@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with nPDF.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <memory>
 #include <keys.h>
 #include <libndls.h>
 #include <string>
@@ -36,7 +35,8 @@ enum ScrollAction {
 	zoomout = 64,
 	zoomin = 128,
 	findnext = 256,
-	findprev = 512
+	findprev = 512,
+	resetzoom = 1024,
 };
 
 ScrollAction operator|(ScrollAction a, ScrollAction b) {
@@ -78,6 +78,8 @@ ScrollAction getScrollKey() {
 		else
 			action |= findnext;
 	}
+	if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_R))
+		action |= resetzoom;
 	return action;
 }
 
@@ -90,122 +92,126 @@ void handleDelays(ScrollAction key, ScrollAction& lastScrollKey) {
 	}
 }
 
-int main(int argc, char **argv) {
-	std::unique_ptr<Viewer> v;
-	try {
-		v.reset(new Viewer);
-	} catch(const char *s) {
-		show_msgbox("nPDF", s);
-		return 1;
+void registerExtensions(char* executable) {
+	std::string s = std::string(executable);
+	size_t pos = s.find_last_of("/");
+	if (pos != std::string::npos) {
+		s.erase(0, s.find_last_of("/") + 1);
 	}
+	if (s.size() >= 4 && s.substr(s.size() - 4) == ".tns") {
+		s.erase(s.size() - 4);
+	}
+	cfg_register_fileext("pdf", s.c_str());
+	cfg_register_fileext("xps", s.c_str());
+	cfg_register_fileext("cbz", s.c_str());
+	cfg_register_fileext("xml", s.c_str());
+	cfg_register_fileext("xhtml", s.c_str());
+	cfg_register_fileext("html", s.c_str());
+	cfg_register_fileext("htm", s.c_str());
+	cfg_register_fileext("epub", s.c_str());
+	show_msgbox("nPDF", "File extensions registered. You can now open a .pdf, .xps, .cbz, .xml, .xhtml, .html, .htm and .epub files from the Documents screen");
+}
 
-	if (argc >= 2) {
-		v->openDoc(argv[1]);
-	} else if (argc >= 1) {
-		std::string s = std::string(argv[0]);
-		size_t pos = s.find_last_of("/");
-		if (pos != std::string::npos) {
-			s.erase(0, s.find_last_of("/") + 1);
-		}
-		if (s.size() >= 4 && s.substr(s.size() - 4) == ".tns") {
-			s.erase(s.size() - 4);
-		}
-		cfg_register_fileext("pdf", s.c_str());
-		cfg_register_fileext("xps", s.c_str());
-		cfg_register_fileext("cbz", s.c_str());
-		cfg_register_fileext("xml", s.c_str());
-		cfg_register_fileext("xhtml", s.c_str());
-		cfg_register_fileext("html", s.c_str());
-		cfg_register_fileext("htm", s.c_str());
-		cfg_register_fileext("epub", s.c_str());
-		show_msgbox("nPDF", "File extensions registered. You can now open a .pdf, .xps, .cbz, .xml, .xhtml, .html, .htm and .epub files from the Documents screen");
+int main(int argc, char **argv) {
+	if (argc == 0) {
+		show_msgbox("nPDF", "Executable called with no arguments. Exiting.");
+		return 1;
+	} else if (argc == 1) {
+		registerExtensions(argv[0]);
 		return 0;
 	}
 
-	if(!Screen::init())
-		return 1;
-	Timer::init();
-	v->drawPage();
-	v->display();
+	try {
+		Viewer v{};
+		v.openDoc(argv[1]);
 
-	ScrollAction lastScrollKey = none;
-	ScrollAction current = none;
+		Screen screen{};
+		Timer::init();
+		v.drawPage();
+		v.display();
 
-	int page;
-	bool toRefresh;
-	while (true) {
-		if ((current = getScrollKey())) {
-			if (current != lastScrollKey || Timer::done()) {
-				toRefresh = false;
-				if (current & down) {
-					v->scrollDown();
-					toRefresh = 1;
-				} else if (current & up) {
-					v->scrollUp();
-					toRefresh = 1;
-				}
-				if (current & right) {
-					v->scrollRight();
-					toRefresh = 1;
-				} else if (current & left) {
-					v->scrollLeft();
-					toRefresh = 1;
-				}
-				if (current & pgdown) {
-					v->next();
-					toRefresh = 1;
-				} else if (current & pgup) {
-					v->prev();
-					toRefresh = 1;
-				}
-				if (current & zoomout) {
-					v->zoomOut();
-					toRefresh = 1;
-				} else if (current & zoomin) {
-					v->zoomIn();
-					toRefresh = 1;
-				}
-				if (current & findnext) {
-					v->findNext(0);
-					toRefresh = 1;
-				} else if (current & findprev) {
-					v->findNext(1);
-					toRefresh = 1;
-				}
-				if (toRefresh) {
-					handleDelays(current, lastScrollKey);
-					v->display();
-				}
-			}
-		} else {
-			lastScrollKey = none;
-			Timer::stop();
-			if (isKeyPressed(KEY_NSPIRE_ESC)) {
-				break;
-			}
-			if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_TAB)) {
-				wait_no_key_pressed();
-				if (show_1numeric_input("Go to page", "", "Enter page number", &page, 1, v->getPages())) {
-					v->gotoPage(page - 1);
-				}
-				v->display();
-			}
-			if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_F)) {
-				char *s = nullptr;
-				wait_no_key_pressed();
-				if (show_msg_user_input("Find", "Enter string to search for", "", &s) != -1) {
-					if(v->find(s)) {
-						v->findNext(0);
+		ScrollAction lastScrollKey = none;
+		ScrollAction current = none;
+
+		int page;
+		bool toRefresh;
+		while (true) {
+			if ((current = getScrollKey())) {
+				if (current != lastScrollKey || Timer::done()) {
+					toRefresh = false;
+					if (current & down) {
+						v.scrollDown();
+						toRefresh = 1;
+					} else if (current & up) {
+						v.scrollUp();
+						toRefresh = 1;
 					}
-					delete s;
+					if (current & right) {
+						v.scrollRight();
+						toRefresh = 1;
+					} else if (current & left) {
+						v.scrollLeft();
+						toRefresh = 1;
+					}
+					if (current & pgdown) {
+						v.next();
+						toRefresh = 1;
+					} else if (current & pgup) {
+						v.prev();
+						toRefresh = 1;
+					}
+					if (current & zoomout) {
+						v.zoomOut();
+						toRefresh = 1;
+					} else if (current & zoomin) {
+						v.zoomIn();
+						toRefresh = 1;
+					} else if (current & resetzoom) {
+						v.setFitSize(true);
+						toRefresh = 1;
+					}
+					if (current & findnext) {
+						v.findNext(Direction::FORWARD);
+						toRefresh = 1;
+					} else if (current & findprev) {
+						v.findNext(Direction::BACKWARD);
+						toRefresh = 1;
+					}
+					if (toRefresh) {
+						handleDelays(current, lastScrollKey);
+						v.display();
+					}
 				}
-				v->display();
+			} else {
+				lastScrollKey = none;
+				Timer::stop();
+				if (isKeyPressed(KEY_NSPIRE_ESC)) {
+					break;
+				}
+				if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_TAB)) {
+					wait_no_key_pressed();
+					if (show_1numeric_input("Go to page", "", "Enter page number", &page, 1, v.getPages())) {
+						if (page > 0){
+							v.gotoPage(static_cast<unsigned int>(page - 1));
+						}
+					}
+					v.display();
+				}
+				if (isKeyPressed(KEY_NSPIRE_CTRL) && isKeyPressed(KEY_NSPIRE_F)) {
+					char *s = nullptr;
+					wait_no_key_pressed();
+					int len = show_msg_user_input("Find", "Enter search string", "", &s);
+					if (len > 0) {
+						v.find(s);
+					}
+					v.display();
+				}
 			}
+			msleep(10);
 		}
-		sleep(10);
+	} catch(const char *s) {
+		show_msgbox("nPDF", s);
 	}
-
-	Screen::deinit();
 
 	return 0;
 }
